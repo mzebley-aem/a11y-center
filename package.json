@@ -1,0 +1,40 @@
+{
+  "name": "a11y-center",
+  "version": "1.0.0",
+  "description": "A web component for the accessibility center widget that extends USWDS+flex.",
+  "main": "public/bundle.js",
+  "scripts": {
+    "build:scss": "sass src/styles/index.scss src/styles/index.css",
+    "build:css": "npm run build:scss && postcss src/styles/index.css -o src/styles/index.css && postcss src/styles/root-variables.css -o public/root-variables.css",
+    "build": "npm run build:css && rollup -c",
+    "start": "npm run build && es-dev-server --app-index public/index.html --node-resolve --watch --watch-exclude 'src/styles/index.css'"
+  },
+  "keywords": [
+    "a11y",
+    "webcomponent",
+    "lit-element",
+    "lit-html",
+    "accessibility"
+  ],
+  "author": "Mark Zebley",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-alias": "^5.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/uuid": "^9.0.8",
+    "autoprefixer": "^10.4.16",
+    "cssnano": "^6.0.1",
+    "es-dev-server": "^2.1.0",
+    "lit": "^3.1.0",
+    "postcss": "^8.4.31",
+    "postcss-cli": "^10.1.0",
+    "postcss-scss": "^4.0.9",
+    "rollup": "^2.79.1",
+    "rollup-plugin-lit-css": "^4.0.1",
+    "sass": "^1.69.5",
+    "typescript": "^5.3.2",
+    "uuid": "^9.0.1"
+  }
+}
