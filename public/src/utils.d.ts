@@ -6,5 +6,7 @@ export declare function mergeSettings<T extends object>(defaultSettings: T, user
  * @param attribute - The data attribute used to apply the settings (e.g., "font-size").
  */
 export declare function generateDynamicCSS(settings: any, attribute: string): void;
+export declare function insertStyleLink(id: string, url: string): void;
+export declare function insertStyleElement(id: string, cssText: string): void;
 export declare function getFocusableElements(container: HTMLElement): HTMLElement[];
 export declare function getNextFocusableElement(triggerId: string, a11yBarId: string): HTMLElement | null;

@@ -1,18 +1,15 @@
 import { LitElement, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import styles from "./styles/index.css";
+import variables from "./styles/_variables.css"; // Importing default variables as a string
+
 import { v4 as uuidv4 } from "uuid";
 
 import { layout } from "./templates/layout";
 import { a11yBar } from "./templates/a11y-bar";
 import { defaultA11ySettings } from "./settings/defaults";
-import {
-  A11ySettings,
-  A11ySelections,
-} from "./settings/types";
-import { FontSizeSettings } from "./modules/fontSize";
-import { FontFamilySettings } from "./modules/fontFamily";
-import { mergeSettings, generateDynamicCSS } from "./utils";
+import { A11ySettings } from "./settings/types";
+import { mergeSettings, getFocusableElements, insertStyleLink, insertStyleElement } from "./utils";
 
 @customElement("a11y-center")
 export class a11yCenter extends LitElement {
@@ -20,101 +17,67 @@ export class a11yCenter extends LitElement {
   private uniqueIdPrefix: string = "";
   private activeTrigger: HTMLElement | null = null;
 
-  private selections!: A11ySelections;
-  private defaultSelections!: A11ySelections;
-
   @property({ type: String })
   header = "Accessibility Center";
 
   @property({ type: Object })
-  settings: A11ySettings = defaultA11ySettings;
+  settings: A11ySettings = {};
 
   private mergedSettings!: A11ySettings;
 
   constructor() {
     super();
     this.uniqueIdPrefix = uuidv4().slice(0, 9);
-    this.injectStylesheet();
     this.addTriggerListeners();
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.updateMergedSettings();
-    this.buildSelectionObj();
     this.addTriggerListeners();
     document.addEventListener("keydown", this.trapFocus);
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener("keydown", this.trapFocus);
+  }
+
   updated(changedProperties: Map<string | number | symbol, unknown>) {
-    if (changedProperties.has('settings')) {
+    if (changedProperties.has("settings")) {
       this.updateMergedSettings();
-      this.buildSelectionObj();
     }
   }
 
   updateMergedSettings() {
-    this.mergedSettings = mergeSettings(this.settings);
-    generateDynamicCSS(this.mergedSettings.fontSize as FontSizeSettings, 'font-size');
-    generateDynamicCSS(this.mergedSettings.fontFamily as FontFamilySettings, 'font-family');
-  }
-
-  buildSelectionObj() {
-    this.selections = {};
-
-    // Initialize selections with default values from settings
-    if (
-      this.mergedSettings.fontSize &&
-      typeof this.mergedSettings.fontSize !== "boolean"
-    ) {
-      this.selections.fontSize =
-        this.mergedSettings.fontSize.default?.label ?? "";
+    if (!this.settings.id) this.settings.id = defaultA11ySettings.id + "-" + this.uniqueIdPrefix;
+    this.mergedSettings = mergeSettings(defaultA11ySettings, this.settings);
+    if (this.mergedSettings.fontSize === true) {
+      this.mergedSettings.fontSize = defaultA11ySettings.fontSize;
     }
-
-    if (
-      this.mergedSettings.fontFamily &&
-      typeof this.mergedSettings.fontFamily !== "boolean"
-    ) {
-      this.selections.fontFamily =
-        this.mergedSettings.fontFamily.default?.label ?? "";
+    if (this.mergedSettings.fontFamily === true) {
+      this.mergedSettings.fontFamily = defaultA11ySettings.fontFamily;
     }
+    this.injectStylesheet();
 
-    // Save default selections
-    this.defaultSelections = { ...this.selections };
-
-    // Retrieve saved selections from localStorage
-    const saved = JSON.parse(
-      localStorage.getItem(this.mergedSettings.saveAs ?? "a11y-center") || "{}"
-    );
-
-    // Update selections with any values from the saved object
-    this.selections = { ...this.selections, ...saved };
-
-    this.applySelections(this.selections);
   }
 
-  resetSelections() {
-    // Reset selections to default values
-    this.selections = { ...this.defaultSelections };
-    this.applySelections(this.selections);
-    this.saveSelectionsLocally();
-  }
-
-  applySelections(selections: A11ySelections) {
-    // Apply selections
-    if (selections.fontSize)
-      this.updateFontSizeSetting(this.selections.fontSize, false);
-    if (selections.fontFamily)
-      this.updateFontFamilySetting(this.selections.fontFamily, false);
+  reset() {
+    this.dispatchEvent(new CustomEvent('reset-settings', { bubbles: true, composed: true }));
   }
 
   injectStylesheet() {
-    // Inject the stylesheet into the document head
-    const stylesheet = document.createElement("style");
-    stylesheet.type = "text/css";
-    stylesheet.id = "a11y-center-styles";
-    stylesheet.textContent = styles.toString();
-    document.head.appendChild(stylesheet);
+    const head = document.head;
+
+    if (this.mergedSettings.tokenURL) {
+      // If a custom stylesheet URL is provided, add it as a link
+      insertStyleLink("a11y-center-tokens", this.mergedSettings.tokenURL);
+    } else {
+      // If no custom stylesheet URL is provided, import the default variables stylesheet
+      insertStyleElement("a11y-center-tokens", variables.toString());
+    }
+
+    insertStyleElement("a11y-center-styles", styles.toString());
   }
 
   createRenderRoot() {
@@ -127,38 +90,13 @@ export class a11yCenter extends LitElement {
         a11yBar(
           this.closeA11yCenter,
           this.mergedSettings,
-          this.selections,
-          this.updateFontSizeSetting,
-          this.updateFontFamilySetting,
-          this.resetSelections
+          this.reset
         ),
         this.header,
-        "a11y-bar open"
+        this.mergedSettings.id?? 'a11y-center',
+        "a11y-bar"
       )}
     `;
-  }
-
-  updateFontSizeSetting = (option: string, save: boolean = true) => {
-    // Update the font size setting
-    document.documentElement.setAttribute("data-a11y-font-size", option);
-    this.selections.fontSize = option;
-    this.requestUpdate(); // Ensure the component updates
-    if (save) this.saveSelectionsLocally();
-  };
-
-  updateFontFamilySetting = (option: string, save: boolean = true) => {
-    // Update the font family setting
-    document.documentElement.setAttribute("data-a11y-font-family", option);
-    this.selections.fontFamily = option;
-    this.requestUpdate(); // Ensure the component updates
-    if (save) this.saveSelectionsLocally();
-  }
-
-  saveSelectionsLocally() {
-    localStorage.setItem(
-      this.mergedSettings.saveAs ?? "a11y-center",
-      JSON.stringify(this.selections)
-    );
   }
 
   addTriggerListeners() {
@@ -179,19 +117,26 @@ export class a11yCenter extends LitElement {
   };
 
   closeA11yCenter = () => {
-    const a11yCenterElement = document.getElementById("a11y-center");
+    const a11yCenterElement = document.getElementById(this.mergedSettings.id?? 'a11y-center');
     if (a11yCenterElement) {
       a11yCenterElement.setAttribute("aria-hidden", "true");
-      a11yCenterElement.style.display = "none";
+      a11yCenterElement.style.visibility = "hidden";
       if (this.activeTrigger) {
         this.activeTrigger.setAttribute("aria-expanded", "false");
         this.activeTrigger.focus();
       }
+      // close all a11y-bar-panel elements
+      const a11yBarPanels = a11yCenterElement.querySelectorAll<HTMLElement>(
+        "a11y-bar-panel"
+      );
+      a11yBarPanels.forEach((panel: any) => {
+        panel.hidePanel();
+      });
     }
   };
 
   toggleVisibility() {
-    const a11yCenterElement = document.getElementById("a11y-center");
+    const a11yCenterElement = document.getElementById(this.mergedSettings.id?? 'a11y-center');
     if (a11yCenterElement) {
       const isVisible =
         a11yCenterElement.getAttribute("aria-hidden") === "false";
@@ -199,31 +144,43 @@ export class a11yCenter extends LitElement {
         this.closeA11yCenter();
       } else {
         a11yCenterElement.setAttribute("aria-hidden", "false");
-        a11yCenterElement.style.display = "flex";
+        a11yCenterElement.style.visibility = "visible";
         this.activeTrigger?.setAttribute("aria-expanded", "true");
-        const firstFocusable = a11yCenterElement.querySelector<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
+        const firstFocusable = getFocusableElements(a11yCenterElement)[0];
         firstFocusable?.focus();
       }
     }
   }
 
   trapFocus = (event: KeyboardEvent) => {
-    const a11yCenterElement = document.getElementById("a11y-center");
+    // Function to check if the event target is a child of an a11y-bar-panel
+    const isChildOfA11yBarPanel = (element: HTMLElement | null): boolean => {
+      while (element) {
+        if (element.tagName.toLowerCase() === 'a11y-bar-panel') {
+          return true;
+        }
+        element = element.parentElement;
+      }
+      return false;
+    };
+  
+    if (isChildOfA11yBarPanel(event.target as HTMLElement)) {
+      // If the event target is a child of an open a11y-bar-panel, skip the a11y-center focus trap logic
+      return;
+    }
+  
+    const a11yCenterElement = document.getElementById(this.mergedSettings.id?? 'a11y-center');
     if (
       !a11yCenterElement ||
       a11yCenterElement.getAttribute("aria-hidden") === "true"
     ) {
       return;
     }
-
-    const focusableElements = a11yCenterElement.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
+  
+    const focusableElements = getFocusableElements(a11yCenterElement);
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
-
+  
     if (event.key === "Tab") {
       if (event.shiftKey) {
         // Shift + Tab
@@ -243,6 +200,7 @@ export class a11yCenter extends LitElement {
       this.closeA11yCenter();
     }
   };
+  
 }
 
 declare global {

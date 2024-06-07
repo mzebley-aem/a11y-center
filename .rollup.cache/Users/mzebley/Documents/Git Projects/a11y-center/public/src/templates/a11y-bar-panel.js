@@ -10,7 +10,7 @@ export class A11yBarPanel extends LitElement {
         this.label = "";
         this.type = "";
         this.triggerId = "";
-        this.a11yBarClass = "";
+        this.parentId = "";
         this.open = false;
         this.handleDocumentMouseDown = (event) => {
             var _a;
@@ -26,11 +26,18 @@ export class A11yBarPanel extends LitElement {
     }
     handleSelectionChange(event) {
         const target = event.target;
-        this.updateSelection(target.value);
+        this.action(target.value);
         this.updatePanelPosition();
     }
     connectedCallback() {
         super.connectedCallback();
+        this.setAttribute("role", "dialog");
+        this.setAttribute("aria-label", this.type + " options");
+    }
+    updated(changedProperties) {
+        if (changedProperties.has("label")) {
+            this.setAttribute("aria-label", "a11y center " + this.type + " options");
+        }
     }
     disconnectedCallback() {
         super.disconnectedCallback();
@@ -39,32 +46,26 @@ export class A11yBarPanel extends LitElement {
         }
     }
     updatePanelPosition() {
-        const a11yBar = document.querySelector(this.a11yBarClass);
+        const a11yBar = document.querySelector("#" + this.parentId);
         if (a11yBar) {
             const a11yBarWidth = a11yBar.offsetWidth;
             this.style.right = `${a11yBarWidth}px`;
         }
     }
-    // Keyboard navigation
-    // Expected flow:
-    // If panel is open and the user presses tab on the trigger, focus should go to the first element in the panel
-    // If panel is open and the user presses shift + tab on the first element in the panel, focus should go back to the trigger
-    // If panel is open and the user presses tab on the last element in the panel, focus should go to the next focusable element in the a11y bar and the panel should close
-    // If panel is open and the user clicks outside the panel, the panel should close
-    // Keyboard navigation handler
     handleKeyboardNavigation(event) {
         const trigger = document.getElementById(this.triggerId);
         const focusableElements = getFocusableElements(this);
-        const radioInputs = Array.from(this.querySelectorAll('.usa-radio__input'));
+        const radioInputs = Array.from(this.querySelectorAll(".usa-radio__input"));
         const firstFocusableElement = focusableElements[0];
         const lastFocusableElement = focusableElements[focusableElements.length - 1];
         const isRadioInput = (element) => radioInputs.includes(element);
-        const getFieldset = (element) => element.closest('fieldset');
+        const getFieldset = (element) => element.closest("fieldset");
         if (this.open && event.key === "Tab" && !event.shiftKey) {
             if (event.target === trigger) {
                 event.preventDefault();
                 if (radioInputs.length > 0) {
-                    const selectedRadio = radioInputs.find((radio) => radio.checked) || radioInputs[0];
+                    const selectedRadio = radioInputs.find((radio) => radio.checked) ||
+                        radioInputs[0];
                     selectedRadio.focus();
                 }
                 else {
@@ -75,19 +76,19 @@ export class A11yBarPanel extends LitElement {
             else if (event.target === lastFocusableElement) {
                 event.preventDefault();
                 this.hidePanel();
-                const nextFocusableElement = getNextFocusableElement(this.triggerId, 'a11y-center');
+                const nextFocusableElement = getNextFocusableElement(this.triggerId, "a11y-center");
                 nextFocusableElement === null || nextFocusableElement === void 0 ? void 0 : nextFocusableElement.focus();
                 return;
             }
             else if (isRadioInput(event.target)) {
                 const currentFieldset = getFieldset(event.target);
                 if (currentFieldset) {
-                    const fieldsets = Array.from(this.querySelectorAll('fieldset'));
+                    const fieldsets = Array.from(this.querySelectorAll("fieldset"));
                     const currentIndex = fieldsets.indexOf(currentFieldset);
                     if (currentIndex === fieldsets.length - 1) {
                         event.preventDefault();
                         this.hidePanel();
-                        const nextFocusableElement = getNextFocusableElement(this.triggerId, 'a11y-center');
+                        const nextFocusableElement = getNextFocusableElement(this.triggerId, "a11y-center");
                         nextFocusableElement === null || nextFocusableElement === void 0 ? void 0 : nextFocusableElement.focus();
                     }
                 }
@@ -104,49 +105,74 @@ export class A11yBarPanel extends LitElement {
                 this.hidePanel();
                 return;
             }
+            else if (isRadioInput(event.target)) {
+                const currentFieldset = getFieldset(event.target);
+                if (currentFieldset) {
+                    const fieldsets = Array.from(this.querySelectorAll("fieldset"));
+                    const currentIndex = fieldsets.indexOf(currentFieldset);
+                    if (currentIndex === 0) {
+                        event.preventDefault();
+                        trigger === null || trigger === void 0 ? void 0 : trigger.focus();
+                    }
+                }
+                return;
+            }
+        }
+        else if (event.key === "Escape") {
+            this.hidePanel();
+            trigger === null || trigger === void 0 ? void 0 : trigger.focus();
         }
     }
-    showPanel() {
+    showPanel(currentSelection) {
         this.updatePanelPosition();
         this.style.display = "flex";
         this.open = true;
-        this.setAttribute("aria-expanded", "true");
-        // Create tab focus logic for trigger
+        // Update current selection before showing the panel
+        this.currentSelection = currentSelection;
         const trigger = document.getElementById(this.triggerId);
+        trigger === null || trigger === void 0 ? void 0 : trigger.setAttribute("aria-expanded", "true");
         trigger === null || trigger === void 0 ? void 0 : trigger.addEventListener("keydown", this.handleKeyboardNavigation.bind(this));
-        // Add event listener for outside clicks
         document.addEventListener("mousedown", this.handleDocumentMouseDown);
         this.addEventListener("keydown", this.handleKeyboardNavigation.bind(this));
     }
     hidePanel() {
         this.style.display = "none";
         this.open = false;
-        this.setAttribute("aria-expanded", "false");
-        // Remove tab focus logic for trigger
         const trigger = document.getElementById(this.triggerId);
         trigger === null || trigger === void 0 ? void 0 : trigger.removeEventListener("keydown", this.handleKeyboardNavigation.bind(this));
-        // Remove event listener for outside clicks
+        trigger === null || trigger === void 0 ? void 0 : trigger.setAttribute("aria-expanded", "false");
         document.removeEventListener("mousedown", this.handleDocumentMouseDown);
         this.removeEventListener("keydown", this.handleKeyboardNavigation.bind(this));
     }
     render() {
         return html `
-      <form class="usa-form">
+      <form
+        class="usa-form"
+        aria-describedby="a11y-bar-panel-${this.type}-form-legend"
+      >
         <fieldset class="usa-fieldset display-flex flex-column gap-05">
-          <legend class="usa-legend usa-legend">${this.label}</legend>
+          <legend
+            id="a11y-bar-panel-${this.type}-form-legend"
+            class="usa-legend usa-legend"
+          >
+            ${this.label}
+          </legend>
           ${this.options.map((option) => html `
               <div class="usa-radio">
                 <input
                   class="usa-radio__input usa-radio__input--tile"
                   id="a11y-bar-panel-${this.type}-option-${option.label}"
                   type="radio"
-                  ?checked="${this.currentSelection === option.label}"
+                  .checked="${this.currentSelection === option.label}"
                   @change="${this.handleSelectionChange}"
                   name="a11y-bar-panel-${this.type}-options"
                   value="${option.label}"
                 />
-                <label class="usa-radio__label" for="a11y-bar-panel-${this.type}-option-${option.label}"
-                  >${option.label}</label>
+                <label
+                  class="usa-radio__label"
+                  for="a11y-bar-panel-${this.type}-option-${option.label}"
+                  >${option.label}</label
+                >
               </div>
             `)}
         </fieldset>
@@ -161,10 +187,6 @@ __decorate([
 __decorate([
     property({ type: String }),
     __metadata("design:type", String)
-], A11yBarPanel.prototype, "currentSelection", void 0);
-__decorate([
-    property({ type: String }),
-    __metadata("design:type", String)
 ], A11yBarPanel.prototype, "label", void 0);
 __decorate([
     property({ type: String }),
@@ -173,7 +195,7 @@ __decorate([
 __decorate([
     property({ type: Function }),
     __metadata("design:type", Function)
-], A11yBarPanel.prototype, "updateSelection", void 0);
+], A11yBarPanel.prototype, "action", void 0);
 __decorate([
     property({ type: String }),
     __metadata("design:type", String)
@@ -181,7 +203,7 @@ __decorate([
 __decorate([
     property({ type: String }),
     __metadata("design:type", String)
-], A11yBarPanel.prototype, "a11yBarClass", void 0);
+], A11yBarPanel.prototype, "parentId", void 0);
 __decorate([
     property({ type: Boolean }),
     __metadata("design:type", Boolean)

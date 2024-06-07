@@ -1,0 +1,18 @@
+a11y-bar-panel {
+    position: fixed;
+    top: 0;
+    background: var(--usa-white);
+    padding: var(--usa-spacing-105);
+    min-width: var(--usa-spacing-card-lg);
+    max-width: var(--usa-spacing-tablet);
+    border: var(--usa-border-width-05) solid var(--a11y-panel-background);
+    border-right:none;
+    border-radius: var(--usa-border-radius-lg) 0 0 var(--usa-border-radius-lg);
+    display: none;
+    height: 100%;
+    overflow: auto;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    z-index: 9999;
+}

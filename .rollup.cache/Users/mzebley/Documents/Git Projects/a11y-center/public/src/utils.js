@@ -30,16 +30,53 @@ export function generateDynamicCSS(settings, attribute) {
     styleElement.id = `a11y-dynamic-styles-${attribute}`;
     let cssText = "";
     (_a = settings.options) === null || _a === void 0 ? void 0 : _a.forEach((option) => {
-        let cssVariables = "";
-        option.values.forEach((variable) => {
-            const key = Object.keys(variable)[0];
-            const value = variable[key];
-            cssVariables += `${key}: ${value}; `;
-        });
-        cssText += `html[data-a11y-${attribute}="${option.label}"] { ${cssVariables} } `;
+        if (!option.urlPath) {
+            let cssVariables = "";
+            option.values.forEach((variable) => {
+                const key = Object.keys(variable)[0];
+                const value = variable[key];
+                cssVariables += `${key}: ${value}; `;
+            });
+            if (option.additionalCSS) {
+                cssVariables += option.additionalCSS;
+            }
+            cssText += `html[data-a11y-${attribute}="${option.label}"] { 
+      ${cssVariables} 
+    } `;
+        }
+        else {
+            cssText += `html[data-a11y-${attribute}="${option.label}"] { @import url('${option.urlPath}');}`;
+        }
     });
     styleElement.textContent = cssText;
     document.head.appendChild(styleElement);
+}
+// Function to insert a link to a stylesheet in the head of the document
+export function insertStyleLink(id, url) {
+    const head = document.head;
+    // Remove any existing a11y-center stylesheets
+    const existingStylesheet = document.getElementById(id);
+    if (existingStylesheet) {
+        head.removeChild(existingStylesheet);
+    }
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url;
+    link.id = id;
+    head.appendChild(link);
+}
+// Function to insert a style element in the head of the document
+export function insertStyleElement(id, cssText) {
+    const head = document.head;
+    // Remove any existing a11y-center stylesheets
+    const existingStylesheet = document.getElementById(id);
+    if (existingStylesheet) {
+        head.removeChild(existingStylesheet);
+    }
+    const style = document.createElement("style");
+    style.textContent = cssText;
+    style.id = id;
+    head.appendChild(style);
 }
 // Utility function to get all focusable elements within a container
 export function getFocusableElements(container) {

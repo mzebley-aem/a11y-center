@@ -1,22 +1,21 @@
 // a11y-bar.ts
 import { html } from "lit";
-import { A11ySettings, A11ySelections } from "../settings/types";
-import { FontSizeSettings, fontSize } from "../modules/fontSize";
-import { FontFamilySettings, fontFamily } from "../modules/fontFamily";
-
-import { a11yBarButton } from "./button";
-// import { fontFamily } from "./modules/fontFamily";
+import { A11ySettings } from "../settings/types";
+import { fontSize } from "../modules/font-size";
+import { FontSizeSettings } from "../modules/font-size/types";
+import { fontFamily } from "../modules/font-family";
+import { FontFamilySettings } from "../modules/font-family/types";
+import { colorTheme } from "src/modules/color-themes";
+import { ColorThemeSettings } from "src/modules/color-themes/types";
 
 export const a11yBar = (
   closeFunction: () => void,
   settings: A11ySettings,
-  selections: A11ySelections,
-  updateFontSizeSetting: (option: string) => void,
-  updateFontFamilySetting: (option: string) => void,
   resetSettings: () => void
 ) => html`
   <button
     @click="${closeFunction}"
+    id="${settings.id?? 'a11y-center'}-close-button"
     aria-label="Close Accessibility Center"
     type="button"
     style="flex-direction: column;top:var(--usa-spacing-1)"
@@ -24,7 +23,6 @@ export const a11yBar = (
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="icon icon-tabler icon-tabler-x"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -44,22 +42,32 @@ export const a11yBar = (
     Close
   </button>
   <ul class="content">
+    ${settings.colorTheme
+      ? colorTheme(
+          settings.colorTheme as ColorThemeSettings,
+          settings.saveAs ?? "a11y-center-selections",
+          settings.id ?? "a11y-center"
+        )
+      : ""}
     ${settings.fontSize
       ? fontSize(
-        settings.fontSize as FontSizeSettings, 
-        updateFontSizeSetting,
-        selections.fontSize?? null)
+          settings.fontSize as FontSizeSettings,
+          settings.saveAs ?? "a11y-center-selections",
+          settings.id ?? "a11y-center"
+        )
       : ""}
     ${settings.fontFamily
       ? fontFamily(
-        settings.fontFamily as FontFamilySettings, 
-        updateFontFamilySetting,
-        selections.fontFamily?? null)
+          settings.fontFamily as FontFamilySettings,
+          settings.saveAs ?? "a11y-center-selections",
+          settings.id ?? "a11y-center"
+        )
       : ""}
   </ul>
   <button
-  @click="${resetSettings}"
+    @click="${resetSettings}"
     type="button"
+    id="${settings.id?? 'a11y-center'}-reset-button"
     style="flex-direction: column;"
     class="usa-button padding-y-105 padding-x-205 usa-button--unstyled width-full"
   >

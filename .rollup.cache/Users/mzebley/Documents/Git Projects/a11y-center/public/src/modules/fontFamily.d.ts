@@ -1,4 +1,4 @@
-import { GenericOption } from "../settings/types";
+import { GenericOption } from "src/settings/types";
 import "src/templates/a11y-bar-panel";
 export interface FontFamilySettings {
     options?: GenericOption[];

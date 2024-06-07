@@ -2,73 +2,211 @@
 <html lang="en-US">
 
 <head>
-    <title>Accessibility Center Component Demo</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="uswds+.min.css">
-    <link rel="stylesheet" href="uswds+.tokens.css">
-    <link rel="stylesheet" href="root-variables.css">
-    <script type="module" src="bundle.js"></script>
+  <title>Accessibility Center Component Demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="uswds+.min.css">
+  <link rel="stylesheet" href="uswds+.tokens.css">
+  <script type="module" src="bundle.js"></script>
 </head>
 
 <body>
-    <main class="display-flex gap-2 flex-justify" id="demo">
-        <div class="padding-2">
-            <button data-a11y-trigger class="usa-button">Toggle a11y</button>
-            <table class="usa-table">
-                <caption>
-                  Bordered table
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Document title</th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Year</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Declaration of Independence</th>
-                    <td>
-                      Statement adopted by the Continental Congress declaring independence
-                      from the British Empire.
-                    </td>
-                    <td>1776</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Bill of Rights</th>
-                    <td>
-                      The first ten amendments of the U.S. Constitution guaranteeing rights
-                      and freedoms.
-                    </td>
-                    <td>1791</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Declaration of Sentiments</th>
-                    <td>
-                      A document written during the Seneca Falls Convention outlining the
-                      rights that American women should be entitled to as citizens.
-                    </td>
-                    <td>1848</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Emancipation Proclamation</th>
-                    <td>
-                      An executive order granting freedom to slaves in designated southern
-                      states.
-                    </td>
-                    <td>1863</td>
-                  </tr>
-                </tbody>
-              </table>
-        </div>
-        <a11y-center></a11y-center>
-    </main>
-    <script type="module">
-        document.addEventListener('DOMContentLoaded', (event) => {
-            console.log('DOM fully loaded and parsed');
-        });
-    </script>
+  <main class="display-flex gap-2 flex-justify" id="demo">
+    <div class="padding-2">
+      <button data-a11y-trigger class="usa-button">Toggle a11y</button>
+      <table class="usa-table">
+        <caption>
+          Bordered table
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Document title</th>
+            <th scope="col">Description</th>
+            <th scope="col">Year</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Declaration of Independence</th>
+            <td>
+              Statement adopted by the Continental Congress declaring independence
+              from the British Empire.
+            </td>
+            <td>1776</td>
+          </tr>
+          <tr>
+            <th scope="row">Bill of Rights</th>
+            <td>
+              The first ten amendments of the U.S. Constitution guaranteeing rights
+              and freedoms.
+            </td>
+            <td>1791</td>
+          </tr>
+          <tr>
+            <th scope="row">Declaration of Sentiments</th>
+            <td>
+              A document written during the Seneca Falls Convention outlining the
+              rights that American women should be entitled to as citizens.
+            </td>
+            <td>1848</td>
+          </tr>
+          <tr>
+            <th scope="row">Emancipation Proclamation</th>
+            <td>
+              An executive order granting freedom to slaves in designated southern
+              states.
+            </td>
+            <td>1863</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3 class="site-preview-heading">Default</h3>
+<div class="usa-step-indicator" aria-label="progress">
+  <ol class="usa-step-indicator__segments">
+    <li
+      class="usa-step-indicator__segment usa-step-indicator__segment--complete"
+    >
+      <span class="usa-step-indicator__segment-label"
+        >Personal information <span class="usa-sr-only">completed</span></span
+      >
+    </li>
+    <li
+      class="usa-step-indicator__segment usa-step-indicator__segment--complete"
+    >
+      <span class="usa-step-indicator__segment-label"
+        >Household status <span class="usa-sr-only">completed</span></span
+      >
+    </li>
+    <li
+      class="usa-step-indicator__segment usa-step-indicator__segment--current"
+      aria-current="true"
+    >
+      <span class="usa-step-indicator__segment-label"
+        >Supporting documents</span
+      >
+    </li>
+    <li class="usa-step-indicator__segment">
+      <span class="usa-step-indicator__segment-label"
+        >Signature <span class="usa-sr-only">not completed</span></span
+      >
+    </li>
+    <li class="usa-step-indicator__segment">
+      <span class="usa-step-indicator__segment-label"
+        >Review and submit <span class="usa-sr-only">not completed</span></span
+      >
+    </li>
+  </ol>
+  <div class="usa-step-indicator__header">
+    <h4 class="usa-step-indicator__heading gap-1">
+      <span class="usa-step-indicator__heading-counter"
+        ><span class="usa-sr-only">Step</span>
+        <span class="usa-step-indicator__current-step">3</span>
+        <span class="usa-step-indicator__total-steps">of 5</span> </span
+      ><span class="usa-step-indicator__heading-text"
+        >Supporting documents</span
+      >
+    </h4>
+  </div>
+</div>
+      <h3 class="site-preview-heading">Default</h3>
+      <ol class="usa-process-list">
+        <li class="usa-process-list__item">
+          <h4 class="usa-process-list__heading">Start a process</h4>
+          <p class="margin-top-05">
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo,
+            ipsum sed pharetra gravida, orci magna rhoncus neque.
+          </p>
+          <ul>
+            <li>
+              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo,
+              ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio
+              lorem non turpis.
+            </li>
+            <li>
+              Nullam sit amet enim. Suspendisse id velit vitae ligula volutpat
+              condimentum.
+            </li>
+            <li>Aliquam erat volutpat. Sed quis velit.</li>
+          </ul>
+        </li>
+        <li class="usa-process-list__item">
+          <h4 class="usa-process-list__heading">Proceed to the second step</h4>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo,
+            ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio
+            lorem non turpis. Nullam sit amet enim. Suspendisse id velit vitae ligula
+            volutpat condimentum. Aliquam erat volutpat. Sed quis velit. Nulla
+            facilisi. Nulla libero. Vivamus pharetra posuere sapien.
+          </p>
+        </li>
+        <li class="usa-process-list__item">
+          <h4 class="usa-process-list__heading">Complete the step-by-step process</h4>
+          <p>
+            Nullam sit amet enim. Suspendisse id velit vitae ligula volutpat
+            condimentum. Aliquam erat volutpat. Sed quis velit. Nulla facilisi. Nulla
+            libero. Vivamus pharetra posuere sapien.
+          </p>
+        </li>
+      </ol>
+
+      <h3 class="site-preview-heading">No text and custom sizing</h3>
+      <ol class="usa-process-list">
+        <li class="usa-process-list__item padding-bottom-4">
+          <p class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Start a process.
+          </p>
+        </li>
+        <li class="usa-process-list__item padding-bottom-4">
+          <p class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Proceed to the second step.
+          </p>
+        </li>
+        <li class="usa-process-list__item">
+          <p class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Complete the step-by-step process.
+          </p>
+        </li>
+      </ol>
+
+      <h3 class="site-preview-heading">Custom sizing</h3>
+      <ol class="usa-process-list">
+        <li class="usa-process-list__item padding-bottom-4">
+          <h4 class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Start a process.
+          </h4>
+          <p class="font-sans-lg margin-top-1 text-light">
+            Nullam sit amet enim. Suspendisse id velit vitae ligula volutpat
+            condimentum.
+          </p>
+        </li>
+        <li class="usa-process-list__item padding-bottom-4">
+          <h4 class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Proceed to the second step.
+          </h4>
+          <p class="font-sans-lg margin-top-1 text-light">
+            Suspendisse id velit vitae ligula volutpat condimentum. Aliquam erat
+            volutpat.
+          </p>
+        </li>
+        <li class="usa-process-list__item">
+          <h4 class="usa-process-list__heading font-sans-xl line-height-sans-1">
+            Complete the step-by-step process.
+          </h4>
+          <p class="font-sans-lg margin-top-1 text-light">
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo,
+            ipsum sed pharetra gravida, orci magna rhoncus neque.
+          </p>
+        </li>
+      </ol>
+    </div>
+    <a11y-center></a11y-center>
+  </main>
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', (event) => {
+      console.log('DOM fully loaded and parsed');
+    });
+    const a11yCenter = document.getElementsByTagName('a11y-center')[0];
+  </script>
 </body>
 
 </html>

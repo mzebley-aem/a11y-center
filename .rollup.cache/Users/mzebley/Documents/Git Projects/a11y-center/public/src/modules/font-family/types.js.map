@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"","sources":["../../../../src/modules/font-family/types.ts"],"names":[],"mappings":"","sourcesContent":["import { GenericOption } from \"src/settings/types\";\n\nexport interface FontFamilySettings {\n    options?: GenericOption[];\n    default?: GenericOption;\n    imports?: string[];\n  }"]}

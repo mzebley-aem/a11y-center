@@ -1,13 +1,14 @@
 // a11y-bar.ts
 import { html } from "lit";
-import { fontSize } from "../modules/fontSize";
-import { fontFamily } from "../modules/fontFamily";
-// import { fontFamily } from "./modules/fontFamily";
-export const a11yBar = (closeFunction, settings, selections, updateFontSizeSetting, updateFontFamilySetting, resetSettings) => {
-    var _a, _b;
+import { fontSize } from "../modules/font-size";
+import { fontFamily } from "../modules/font-family";
+import { colorTheme } from "src/modules/color-themes";
+export const a11yBar = (closeFunction, settings, resetSettings) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     return html `
   <button
     @click="${closeFunction}"
+    id="${(_a = settings.id) !== null && _a !== void 0 ? _a : 'a11y-center'}-close-button"
     aria-label="Close Accessibility Center"
     type="button"
     style="flex-direction: column;top:var(--usa-spacing-1)"
@@ -15,7 +16,6 @@ export const a11yBar = (closeFunction, settings, selections, updateFontSizeSetti
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="icon icon-tabler icon-tabler-x"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -35,16 +35,20 @@ export const a11yBar = (closeFunction, settings, selections, updateFontSizeSetti
     Close
   </button>
   <ul class="content">
+    ${settings.colorTheme
+        ? colorTheme(settings.colorTheme, (_b = settings.saveAs) !== null && _b !== void 0 ? _b : "a11y-center-selections", (_c = settings.id) !== null && _c !== void 0 ? _c : "a11y-center")
+        : ""}
     ${settings.fontSize
-        ? fontSize(settings.fontSize, updateFontSizeSetting, (_a = selections.fontSize) !== null && _a !== void 0 ? _a : null)
+        ? fontSize(settings.fontSize, (_d = settings.saveAs) !== null && _d !== void 0 ? _d : "a11y-center-selections", (_e = settings.id) !== null && _e !== void 0 ? _e : "a11y-center")
         : ""}
     ${settings.fontFamily
-        ? fontFamily(settings.fontFamily, updateFontFamilySetting, (_b = selections.fontFamily) !== null && _b !== void 0 ? _b : null)
+        ? fontFamily(settings.fontFamily, (_f = settings.saveAs) !== null && _f !== void 0 ? _f : "a11y-center-selections", (_g = settings.id) !== null && _g !== void 0 ? _g : "a11y-center")
         : ""}
   </ul>
   <button
-  @click="${resetSettings}"
+    @click="${resetSettings}"
     type="button"
+    id="${(_h = settings.id) !== null && _h !== void 0 ? _h : 'a11y-center'}-reset-button"
     style="flex-direction: column;"
     class="usa-button padding-y-105 padding-x-205 usa-button--unstyled width-full"
   >

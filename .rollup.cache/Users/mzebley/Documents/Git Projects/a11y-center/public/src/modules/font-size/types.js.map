@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"","sources":["../../../../src/modules/font-size/types.ts"],"names":[],"mappings":"","sourcesContent":["import { GenericOption } from \"../../settings/types\";\n\n// Interface defining the structure for font size settings\nexport interface FontSizeSettings {\n    options?: GenericOption[];\n    default?: GenericOption;\n  }\n  "]}

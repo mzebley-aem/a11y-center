@@ -1,4 +1,5 @@
-@forward './a11y-center.scss';
+@forward './_a11y-center';
+@forward './parts/a11y-bar-panel';
 
 :host {
     display: flex;

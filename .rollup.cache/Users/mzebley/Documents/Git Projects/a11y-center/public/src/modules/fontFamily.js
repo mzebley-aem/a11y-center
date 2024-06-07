@@ -23,10 +23,20 @@ const defaultFontFamilyOptions = [
             { "--usa-font-alt": '"Atkinson Hyperlegible", sans-serif !important' },
         ],
     },
+    {
+        label: "Roboto Mono",
+        values: [
+            { "--usa-font-sans": '"Roboto Mono", monospace !important' },
+            { "--usa-font-serif": '"Roboto Mono", monospace !important' },
+            { "--usa-font-alt": '"Roboto Mono", monospace !important' },
+        ]
+    }
 ];
 const defaultFontFamilyImports = [
     "@import url('https://fonts.cdnfonts.com/css/open-dyslexic');",
-    "@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');"
+    "@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');",
+    "@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');",
+    "@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');"
 ];
 export const defaultFontFamilySettings = {
     options: defaultFontFamilyOptions,
@@ -40,7 +50,6 @@ class FontFamilyModule extends LitElement {
         this.default = "Default";
         this.handleButtonClick = () => {
             this.panel.open ? this.panel.hidePanel() : this.panel.showPanel();
-            console.log(this.panel.open);
         };
         this.availableFontFamilies = [];
     }
@@ -92,7 +101,7 @@ class FontFamilyModule extends LitElement {
             this.panel.label = "Choose a Font Family";
             this.panel.updateSelection = this.updateFontFamilySetting;
             this.panel.triggerId = "a11y-font-family-trigger";
-            this.panel.a11yBarClass = ".a11y-bar";
+            this.panel.type = "font-family";
         }
     }
     render() {
@@ -103,7 +112,6 @@ class FontFamilyModule extends LitElement {
           @click="${this.handleButtonClick}"
           style="flex-direction: column;"
           id="a11y-font-family-trigger"
-          role="menuitem"
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="a11y-bar-font-family-panel"
@@ -111,7 +119,6 @@ class FontFamilyModule extends LitElement {
             .currentFontFamily !== this.default
             ? "bg-a11y-active"
             : ""}"
-          aria-label="Font family set to ${this.currentFontFamily}"
         >
           <span class="text-bold font-xl"> abc </span>
           Font

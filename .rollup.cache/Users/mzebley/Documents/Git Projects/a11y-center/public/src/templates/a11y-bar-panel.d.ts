@@ -4,11 +4,12 @@ export interface A11yBarPanelElement extends HTMLElement {
     options: GenericOption[];
     currentSelection: string;
     label: string;
-    updateSelection: (option: string) => void;
+    type: string;
+    action: (option: string) => void;
     triggerId: string;
-    a11yBarClass: string;
+    parentId: string;
     open: boolean;
-    showPanel: () => void;
+    showPanel: (selection: string) => void;
     hidePanel: () => void;
 }
 export declare class A11yBarPanel extends LitElement {
@@ -16,17 +17,18 @@ export declare class A11yBarPanel extends LitElement {
     currentSelection: string;
     label: string;
     type: string;
-    updateSelection: (option: string) => void;
+    action: (option: string) => void;
     triggerId: string;
-    a11yBarClass: string;
+    parentId: string;
     open: boolean;
     createRenderRoot(): this;
     handleSelectionChange(event: Event): void;
     connectedCallback(): void;
+    updated(changedProperties: Map<string | number | symbol, unknown>): void;
     disconnectedCallback(): void;
     updatePanelPosition(): void;
     handleKeyboardNavigation(event: KeyboardEvent): void;
-    showPanel(): void;
+    showPanel(currentSelection: string): void;
     hidePanel(): void;
     handleDocumentMouseDown: (event: MouseEvent) => void;
     render(): import("lit-html").TemplateResult<1>;

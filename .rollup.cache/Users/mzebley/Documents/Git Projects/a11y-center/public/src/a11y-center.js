@@ -2,57 +2,63 @@ import { __decorate, __metadata } from "tslib";
 import { LitElement, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import styles from "./styles/index.css";
+import variables from "./styles/_variables.css"; // Importing default variables as a string
 import { v4 as uuidv4 } from "uuid";
 import { layout } from "./templates/layout";
 import { a11yBar } from "./templates/a11y-bar";
 import { defaultA11ySettings } from "./settings/defaults";
-import { mergeSettings, generateDynamicCSS } from "./utils";
+import { mergeSettings, getFocusableElements, insertStyleLink, insertStyleElement } from "./utils";
 let a11yCenter = class a11yCenter extends LitElement {
     constructor() {
         super();
         this.uniqueIdPrefix = "";
         this.activeTrigger = null;
         this.header = "Accessibility Center";
-        this.settings = defaultA11ySettings;
-        this.updateFontSizeSetting = (option, save = true) => {
-            // Update the font size setting
-            document.documentElement.setAttribute("data-a11y-font-size", option);
-            this.selections.fontSize = option;
-            this.requestUpdate(); // Ensure the component updates
-            if (save)
-                this.saveSelectionsLocally();
-        };
-        this.updateFontFamilySetting = (option, save = true) => {
-            // Update the font family setting
-            document.documentElement.setAttribute("data-a11y-font-family", option);
-            this.selections.fontFamily = option;
-            this.requestUpdate(); // Ensure the component updates
-            if (save)
-                this.saveSelectionsLocally();
-        };
+        this.settings = {};
         this.toggleA11yCenter = (event) => {
             const trigger = event.currentTarget;
             this.activeTrigger = trigger;
             this.toggleVisibility();
         };
         this.closeA11yCenter = () => {
-            const a11yCenterElement = document.getElementById("a11y-center");
+            var _a;
+            const a11yCenterElement = document.getElementById((_a = this.mergedSettings.id) !== null && _a !== void 0 ? _a : 'a11y-center');
             if (a11yCenterElement) {
                 a11yCenterElement.setAttribute("aria-hidden", "true");
-                a11yCenterElement.style.display = "none";
+                a11yCenterElement.style.visibility = "hidden";
                 if (this.activeTrigger) {
                     this.activeTrigger.setAttribute("aria-expanded", "false");
                     this.activeTrigger.focus();
                 }
+                // close all a11y-bar-panel elements
+                const a11yBarPanels = a11yCenterElement.querySelectorAll("a11y-bar-panel");
+                a11yBarPanels.forEach((panel) => {
+                    panel.hidePanel();
+                });
             }
         };
         this.trapFocus = (event) => {
-            const a11yCenterElement = document.getElementById("a11y-center");
+            var _a;
+            // Function to check if the event target is a child of an a11y-bar-panel
+            const isChildOfA11yBarPanel = (element) => {
+                while (element) {
+                    if (element.tagName.toLowerCase() === 'a11y-bar-panel') {
+                        return true;
+                    }
+                    element = element.parentElement;
+                }
+                return false;
+            };
+            if (isChildOfA11yBarPanel(event.target)) {
+                // If the event target is a child of an open a11y-bar-panel, skip the a11y-center focus trap logic
+                return;
+            }
+            const a11yCenterElement = document.getElementById((_a = this.mergedSettings.id) !== null && _a !== void 0 ? _a : 'a11y-center');
             if (!a11yCenterElement ||
                 a11yCenterElement.getAttribute("aria-hidden") === "true") {
                 return;
             }
-            const focusableElements = a11yCenterElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const focusableElements = getFocusableElements(a11yCenterElement);
             const firstElement = focusableElements[0];
             const lastElement = focusableElements[focusableElements.length - 1];
             if (event.key === "Tab") {
@@ -77,81 +83,58 @@ let a11yCenter = class a11yCenter extends LitElement {
             }
         };
         this.uniqueIdPrefix = uuidv4().slice(0, 9);
-        this.injectStylesheet();
         this.addTriggerListeners();
     }
     connectedCallback() {
         super.connectedCallback();
         this.updateMergedSettings();
-        this.buildSelectionObj();
         this.addTriggerListeners();
         document.addEventListener("keydown", this.trapFocus);
     }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        document.removeEventListener("keydown", this.trapFocus);
+    }
     updated(changedProperties) {
-        if (changedProperties.has('settings')) {
+        if (changedProperties.has("settings")) {
             this.updateMergedSettings();
-            this.buildSelectionObj();
         }
     }
     updateMergedSettings() {
-        this.mergedSettings = mergeSettings(this.settings);
-        generateDynamicCSS(this.mergedSettings.fontSize, 'font-size');
-        generateDynamicCSS(this.mergedSettings.fontFamily, 'font-family');
-    }
-    buildSelectionObj() {
-        var _a, _b, _c, _d, _e;
-        this.selections = {};
-        // Initialize selections with default values from settings
-        if (this.mergedSettings.fontSize &&
-            typeof this.mergedSettings.fontSize !== "boolean") {
-            this.selections.fontSize =
-                (_b = (_a = this.mergedSettings.fontSize.default) === null || _a === void 0 ? void 0 : _a.label) !== null && _b !== void 0 ? _b : "";
+        if (!this.settings.id)
+            this.settings.id = defaultA11ySettings.id + "-" + this.uniqueIdPrefix;
+        this.mergedSettings = mergeSettings(defaultA11ySettings, this.settings);
+        if (this.mergedSettings.fontSize === true) {
+            this.mergedSettings.fontSize = defaultA11ySettings.fontSize;
         }
-        if (this.mergedSettings.fontFamily &&
-            typeof this.mergedSettings.fontFamily !== "boolean") {
-            this.selections.fontFamily =
-                (_d = (_c = this.mergedSettings.fontFamily.default) === null || _c === void 0 ? void 0 : _c.label) !== null && _d !== void 0 ? _d : "";
+        if (this.mergedSettings.fontFamily === true) {
+            this.mergedSettings.fontFamily = defaultA11ySettings.fontFamily;
         }
-        // Save default selections
-        this.defaultSelections = Object.assign({}, this.selections);
-        // Retrieve saved selections from localStorage
-        const saved = JSON.parse(localStorage.getItem((_e = this.mergedSettings.saveAs) !== null && _e !== void 0 ? _e : "a11y-center") || "{}");
-        // Update selections with any values from the saved object
-        this.selections = Object.assign(Object.assign({}, this.selections), saved);
-        this.applySelections(this.selections);
+        this.injectStylesheet();
     }
-    resetSelections() {
-        // Reset selections to default values
-        this.selections = Object.assign({}, this.defaultSelections);
-        this.applySelections(this.selections);
-        this.saveSelectionsLocally();
-    }
-    applySelections(selections) {
-        // Apply selections
-        if (selections.fontSize)
-            this.updateFontSizeSetting(this.selections.fontSize, false);
-        if (selections.fontFamily)
-            this.updateFontFamilySetting(this.selections.fontFamily, false);
+    reset() {
+        this.dispatchEvent(new CustomEvent('reset-settings', { bubbles: true, composed: true }));
     }
     injectStylesheet() {
-        // Inject the stylesheet into the document head
-        const stylesheet = document.createElement("style");
-        stylesheet.type = "text/css";
-        stylesheet.id = "a11y-center-styles";
-        stylesheet.textContent = styles.toString();
-        document.head.appendChild(stylesheet);
+        const head = document.head;
+        if (this.mergedSettings.tokenURL) {
+            // If a custom stylesheet URL is provided, add it as a link
+            insertStyleLink("a11y-center-tokens", this.mergedSettings.tokenURL);
+        }
+        else {
+            // If no custom stylesheet URL is provided, import the default variables stylesheet
+            insertStyleElement("a11y-center-tokens", variables.toString());
+        }
+        insertStyleElement("a11y-center-styles", styles.toString());
     }
     createRenderRoot() {
         return this;
     }
     render() {
-        return html `
-      ${layout(a11yBar(this.closeA11yCenter, this.mergedSettings, this.selections, this.updateFontSizeSetting, this.updateFontFamilySetting, this.resetSelections), this.header, "a11y-bar open")}
-    `;
-    }
-    saveSelectionsLocally() {
         var _a;
-        localStorage.setItem((_a = this.mergedSettings.saveAs) !== null && _a !== void 0 ? _a : "a11y-center", JSON.stringify(this.selections));
+        return html `
+      ${layout(a11yBar(this.closeA11yCenter, this.mergedSettings, this.reset), this.header, (_a = this.mergedSettings.id) !== null && _a !== void 0 ? _a : 'a11y-center', "a11y-bar")}
+    `;
     }
     addTriggerListeners() {
         // Add event listeners to all elements with the data-a11y-trigger attribute
@@ -163,8 +146,8 @@ let a11yCenter = class a11yCenter extends LitElement {
         });
     }
     toggleVisibility() {
-        var _a;
-        const a11yCenterElement = document.getElementById("a11y-center");
+        var _a, _b;
+        const a11yCenterElement = document.getElementById((_a = this.mergedSettings.id) !== null && _a !== void 0 ? _a : 'a11y-center');
         if (a11yCenterElement) {
             const isVisible = a11yCenterElement.getAttribute("aria-hidden") === "false";
             if (isVisible) {
@@ -172,9 +155,9 @@ let a11yCenter = class a11yCenter extends LitElement {
             }
             else {
                 a11yCenterElement.setAttribute("aria-hidden", "false");
-                a11yCenterElement.style.display = "flex";
-                (_a = this.activeTrigger) === null || _a === void 0 ? void 0 : _a.setAttribute("aria-expanded", "true");
-                const firstFocusable = a11yCenterElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                a11yCenterElement.style.visibility = "visible";
+                (_b = this.activeTrigger) === null || _b === void 0 ? void 0 : _b.setAttribute("aria-expanded", "true");
+                const firstFocusable = getFocusableElements(a11yCenterElement)[0];
                 firstFocusable === null || firstFocusable === void 0 ? void 0 : firstFocusable.focus();
             }
         }
