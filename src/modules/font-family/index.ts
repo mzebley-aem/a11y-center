@@ -151,7 +151,7 @@ class FontFamilyModule extends LitElement {
             ? "bg-a11y-active"
             : ""}"
         >
-          <span class="text-bold font-xl"> abc </span>
+          <span class="text-bold font-lg"> abc </span>
           Font
         </button>
       </li>

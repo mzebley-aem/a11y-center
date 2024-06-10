@@ -132,7 +132,7 @@ const la={attribute:!0,type:String,converter:f,reflect:!1,hasChanged:w},ua=(a=la
           aria-controls="a11y-bar-font-family-panel"
           class="usa-button padding-y-105 gap-1 padding-x-05 usa-button--unstyled width-full ${this.currentFontFamily!==this.default?"bg-a11y-active":""}"
         >
-          <span class="text-bold font-xl"> abc </span>
+          <span class="text-bold font-lg"> abc </span>
           Font
         </button>
       </li>
